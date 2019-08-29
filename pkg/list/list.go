@@ -33,7 +33,8 @@ type ProbeList struct {
 // ProbeListInit Initialises a new list (A Linked list implementation)
 // \param[in] head A probe_list/linked list context
 func ProbeListInit(head *ProbeList) {
-
+	head.next = nil
+	head.prev = nil
 }
 
 // ProbeListAdd take the value for the new node and adds that to the linklist chain.
@@ -41,13 +42,25 @@ func ProbeListInit(head *ProbeList) {
 // \param[in] new A probe list context to refer new node to be added
 // \param[in] head A probe list context
 func ProbeListAdd(new *ProbeList, head *ProbeList) {
-
+	if ProbeListCheckEmpty(head) {
+		head = new
+		return
+	}
+	temp := head
+	for temp != nil {
+		if temp == new.prev {
+			new.next = temp.next
+			temp.next = new
+			break
+		}
+		temp = temp.next
+	}
 }
 
 // ProbeListDelete delete's a probe list node according to the node context passed.
 //
 // \param[in] ctx A probe list context
-func ProbeListDelete(*ProbeList) {
+func ProbeListDelete(ctx *ProbeList) {
 
 }
 
@@ -56,18 +69,31 @@ func ProbeListDelete(*ProbeList) {
 // \param[in] new A probe list context to refer new node that need to be added
 // \param[in] head A probe list context
 func ProbeListAddEnd(new *ProbeList, head *ProbeList) {
-
+	if ProbeListCheckEmpty(head) {
+		head = new
+		return
+	}
+	temp := head
+	for temp.next != nil {
+		temp = temp.next
+	}
+	temp.next = new
+	new.prev = temp
 }
 
 // ProbeListCheckEmpty checks whether the list is empty. Returns True if the list is empty.
 //
 // \param[in] head A probe list context
-func ProbeListCheckEmpty(head *ProbeList) {
-
+func ProbeListCheckEmpty(head *ProbeList) bool {
+	if head == nil {
+		return true
+	}
+	return false
 }
 
-func _listHead() {
-
+func _listHead(name *ProbeList) {
+	name.next = name
+	name.prev = name
 }
 
 func _listEntry() {
