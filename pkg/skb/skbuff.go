@@ -78,31 +78,9 @@ func ProbeSkbuffGetHead(skb *ProbeSkbuff) uint {
 	return skb.head
 }
 
-// ProbeSkbuffUnlink is used to remove a SKB from the list
-func ProbeSkbuffUnlink(skb *ProbeSkbuff, list *probeSkbuffHead) {
-	var next, prev *ProbeSkbuff
-
-	list.qlen--
-	next = skb.next
-	prev = skb.prev
-	skb.next = nil
-	skb.prev = nil
-	next.prev = prev
-	prev.next = next
-}
-
 /*
  * Probe sk buff datagram/head queue function design
  */
-
-// ProbeSkbuffInsert is used to insert ProbeSkbuff into a list
-func ProbeSkbuffInsert(newsk *ProbeSkbuff, prev *ProbeSkbuff, next *ProbeSkbuff, list *probeSkbuffHead) {
-	newsk.next = next
-	newsk.prev = prev
-	next.prev = newsk
-	prev.next = newsk
-	list.qlen++
-}
 
 func ProbeSkbuffQueueInit(head *probeSkbuffHead) {
 	head.next = nil
@@ -120,28 +98,24 @@ func ProbSkbuffQueueDeinit(head *probeSkbuffHead) {
 func ProbeSkbuffDequeue(head *probeSkbuffHead) *ProbeSkbuff {
 	skb := ProbeSkbuffPeek(head)
 	if skb != nil {
-		ProbeSkbuffUnlink(skb, head)
+		ProbeListDelete(skb, head)
 	}
 	return skb
 }
 
-// ProbeSkbuffQueueAdd is used to add new SKB before next SKB
-func ProbeSkbuffQueueAdd(head *probeSkbuffHead, new *ProbeSkbuff, next *ProbeSkbuff) {
-	ProbeSkbuffInsert(new, next.prev, next, head)
+// ProbeSkbuffQueueAddBefore is used to add 'new' SKB before 'next' SKB
+func ProbeSkbuffQueueAddBefore(head *probeSkbuffHead, new *ProbeSkbuff, next *ProbeSkbuff) {
+	ProbeListAdd(new, next.prev, next, head)
 }
 
-// ProbeSkbuffQueueAddEnd is used to add
+// ProbeSkbuffQueueAddEnd is used to add 'new' SKB to the end of the list
 func ProbeSkbuffQueueAddEnd(head *probeSkbuffHead, new *ProbeSkbuff) {
-	ProbeSkbuffQueueAdd(head, new, head.prev)
+	ProbeSkbuffQueueAddBefore(head, new, head.prev)
 }
 
 // ProbeSkbuffQueueCheckEmpty return 1 if the queue is empty, 0 otherwise
 func ProbeSkbuffQueueCheckEmpty(head *probeSkbuffHead) int {
-	if head.next == nil {
-		return 1
-	} else {
-		return 0
-	}
+	return ProbeListCheckEmpty(head)
 }
 
 // ProbeSkbuffQueueGetLen returns the length of the sk_buff queue
